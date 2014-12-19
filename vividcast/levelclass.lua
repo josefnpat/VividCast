@@ -16,6 +16,9 @@ function level:draw(x,y,rw,rh,sx,sy)
   local old_canvas = love.graphics.getCanvas()
   love.graphics.setCanvas(self._canvas)
 
+  for _,entity in pairs(self:getEntities()) do
+    entity:setVisible(false)
+  end
   for i = 0,w do
     local ray_angle = self:getFOV()*(i/w-0.5)+self:getPlayer():getAngle()
     local ray_x = self:getPlayer():getX()
@@ -39,8 +42,6 @@ function level:draw(x,y,rw,rh,sx,sy)
             current_x == entity:getX() and
             current_y == entity:getY() then
             entity:setVisible(true)
-          else
-            entity:setVisible(false)
           end
         end
 
