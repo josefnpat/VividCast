@@ -139,7 +139,8 @@ function love.draw()
   level:draw(lx,ly,lw,lh,lolscale)
   love.graphics.print( love.timer.getFPS().." fps\n"..
     "FOV: "..level:getFOV().." rad\n"..
-    "Resolution: "..level:getRaycastResolution().."" )
+    "Resolution: "..level:getRaycastResolution().."\n" ..
+    "Entity is ".. (#entity:getVisible()>0 and "" or "not ") .. "visible.")
 
   -- Show a compass
   love.graphics.setColor(255,255,255)

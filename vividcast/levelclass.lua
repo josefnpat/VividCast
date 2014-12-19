@@ -17,7 +17,7 @@ function level:draw(x,y,rw,rh,sx,sy)
   love.graphics.setCanvas(self._canvas)
 
   for _,entity in pairs(self:getEntities()) do
-    entity:setVisible(false)
+    entity:setVisible({})
   end
   for i = 0,w do
     local ray_angle = self:getFOV()*(i/w-0.5)+self:getPlayer():getAngle()
@@ -41,7 +41,9 @@ function level:draw(x,y,rw,rh,sx,sy)
           if entity ~= self:getPlayer() and
             current_x == entity:getX() and
             current_y == entity:getY() then
-            entity:setVisible(true)
+            local visible = entity:getVisible()
+            local o = 1
+            table.insert(visible,{i=i,o=o})
           end
         end
 
@@ -98,6 +100,19 @@ function level:draw(x,y,rw,rh,sx,sy)
         tile:getQuad()[texture_quad],
         i, (h-draw_height)/2,0,
         1,texture_scale)
+    end
+  end
+
+  for _,entity in pairs(self:getEntities()) do
+    local distance = math.sqrt(
+      (entity:getX() - self:getPlayer():getX())^2+
+      (entity:getY() - self:getPlayer():getY())^2)
+    local draw_height = h/distance
+    for _,line in pairs(entity:getVisible()) do
+      local d = line.o*255
+      love.graphics.setColor(d,d,d)
+      love.graphics.rectangle("line",
+        line.i,(h-draw_height)/2,1,draw_height)
     end
   end
 
