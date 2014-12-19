@@ -21,12 +21,33 @@ function level:draw(x,y,rw,rh,sx,sy)
     local ray_x = self:getPlayer():getX()
     local ray_y = self:getPlayer():getY()
     local ray_length = 0
-    while self:getMapCallback()(math.floor(ray_x),math.floor(ray_y)) == 0 and
-      ray_length < self:getRaycastRange() do
+
+    local current_x,current_y
+
+    repeat
       ray_x = ray_x + math.cos(ray_angle) * self:getRaycastResolution()
       ray_y = ray_y + math.sin(ray_angle) * self:getRaycastResolution()
       ray_length = ray_length + self:getRaycastResolution()
-    end
+
+      new_x = math.floor(ray_x)
+      new_y = math.floor(ray_y)
+      if current_x ~= new_x or current_y ~= new_y then
+        current_x,current_y = new_x,new_y
+
+        for _,entity in pairs(self:getEntities()) do
+          if entity ~= self:getPlayer() and
+            current_x == entity:getX() and
+            current_y == entity:getY() then
+            entity:setVisible(true)
+          else
+            entity:setVisible(false)
+          end
+        end
+
+      end
+    until self:getMapCallback()(current_x,current_y) ~= 0 or
+      ray_length >= self:getRaycastRange()
+
     local tile_type = self:getMapCallback()(math.floor(ray_x),math.floor(ray_y))
 
     if ray_length < self:getRaycastRange() then
@@ -99,7 +120,7 @@ function level.new(init)
   self._entitys={}
   self.addEntity=level.addEntity
   self.removeEntity=level.removeEntity
-  self.getEntitys=level.getEntitys
+  self.getEntities=level.getEntities
   self._player=init.player
   self.getPlayer=level.getPlayer
   self.setPlayer=level.setPlayer
@@ -190,7 +211,7 @@ function level:addTile(val)
   table.insert(self._tiles,val)
 end
 
-function level:getEntitys()
+function level:getEntities()
   assert(not self._entitys_dirty,"Error: collection `self._entitys` is dirty.")
   return self._entitys
 end

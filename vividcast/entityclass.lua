@@ -20,6 +20,9 @@ function entity.new(init)
   self._quad=init.quad
   self.getQuad=entity.getQuad
   self.setQuad=entity.setQuad
+  self._visible=init.visible
+  self.getVisible=entity.getVisible
+  self.setVisible=entity.setVisible
 
   self:setTexture(init.texture)
 
@@ -73,6 +76,14 @@ end
 
 function entity:setQuad(val)
   self._quad=val
+end
+
+function entity:getVisible()
+  return self._visible
+end
+
+function entity:setVisible(val)
+  self._visible=val
 end
 
 return entity
