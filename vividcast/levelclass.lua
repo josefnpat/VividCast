@@ -1,5 +1,27 @@
 local level = {}
 
+function level.normalize(i)
+  while i < 0 do
+    i = i + math.pi*2
+  end
+  while i > math.pi*2 do
+    i = i - math.pi*2
+  end
+  return i
+end
+
+function level.distance(a,b)
+  return math.sqrt(
+    (a:getX()-b:getX())^2 +
+    (a:getY()-b:getY())^2 )
+end
+
+function level.angle(a,b)
+  return math.atan2(
+    a:getY()-b:getY(),
+    a:getX()-b:getX())
+end
+
 function level:draw(x,y,rw,rh,sx,sy)
   sx = sx or 1
   sy = sy or sx or 1
@@ -17,10 +39,20 @@ function level:draw(x,y,rw,rh,sx,sy)
   love.graphics.setCanvas(self._canvas)
 
   for _,entity in pairs(self:getEntities()) do
-    entity:setVisible({})
+    if entity ~= self:getPlayer() then
+      entity._vision_angle = level.normalize(
+        level.angle( self:getPlayer(), entity ) - math.pi )
+      entity._vision_distance = level.distance( entity,self:getPlayer() )
+      entity._vision_angle_width = math.atan2( 0.5, entity._vision_distance )
+    end
   end
+
+  local previous_ray_angle = level.normalize(
+    self:getFOV()*(-1/w-0.5)+self:getPlayer():getAngle() )
+
   for i = 0,w do
-    local ray_angle = self:getFOV()*(i/w-0.5)+self:getPlayer():getAngle()
+    local ray_angle = level.normalize(
+      self:getFOV()*(i/w-0.5)+self:getPlayer():getAngle() )
     local ray_x = self:getPlayer():getX()
     local ray_y = self:getPlayer():getY()
     local ray_length = 0
@@ -36,17 +68,6 @@ function level:draw(x,y,rw,rh,sx,sy)
       new_y = math.floor(ray_y)
       if current_x ~= new_x or current_y ~= new_y then
         current_x,current_y = new_x,new_y
-
-        for _,entity in pairs(self:getEntities()) do
-          if entity ~= self:getPlayer() and
-            current_x == entity:getX() and
-            current_y == entity:getY() then
-            local visible = entity:getVisible()
-            local o = 1
-            table.insert(visible,{i=i,o=o})
-          end
-        end
-
       end
     until self:getMapCallback()(current_x,current_y) ~= 0 or
       ray_length >= self:getRaycastRange()
@@ -101,19 +122,33 @@ function level:draw(x,y,rw,rh,sx,sy)
         i, (h-draw_height)/2,0,
         1,texture_scale)
     end
-  end
 
-  for _,entity in pairs(self:getEntities()) do
-    local distance = math.sqrt(
-      (entity:getX() - self:getPlayer():getX())^2+
-      (entity:getY() - self:getPlayer():getY())^2)
-    local draw_height = h/distance
-    for _,line in pairs(entity:getVisible()) do
-      local d = line.o*255
-      love.graphics.setColor(d,d,d)
-      love.graphics.rectangle("line",
-        line.i,(h-draw_height)/2,1,draw_height)
+    for _,entity in pairs(self:getEntities()) do
+      if entity ~= self:getPlayer() then
+        if entity._vision_distance < ray_length and
+          entity._vision_distance < self:getRaycastRange() and
+          entity._vision_angle-entity._vision_angle_width<=ray_angle and
+          entity._vision_angle+entity._vision_angle_width>previous_ray_angle then
+          local distance = ( ( (ray_angle+previous_ray_angle)/2 - entity._vision_angle ) /
+            entity._vision_angle_width +1) /2
+          if distance > 1 then distance = distance-1 end
+          if distance < 0 then distance = distance+1 end
+
+          local darkness = (1-entity._vision_distance/self:getRaycastRange())*255
+          love.graphics.setColor(darkness,darkness,darkness)
+          local draw_height = h/entity._vision_distance
+          local texture_scale = draw_height/entity:getTexture():getHeight()
+          local texture_quad = math.floor(distance*#entity:getQuad())+1
+          love.graphics.draw(
+            entity:getTexture(),
+            entity:getQuad()[texture_quad],
+            i, (h-draw_height)/2,0,
+            1,texture_scale)
+        end
+      end
     end
+
+    previous_ray_angle = ray_angle
   end
 
   love.graphics.setCanvas(old_canvas)

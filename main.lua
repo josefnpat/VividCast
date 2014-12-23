@@ -10,7 +10,7 @@ function map(x,y)
   if y == 1 or y == map_size then
     return 4
   end
-  if x == 4 and (y < 6 or y > 7) then
+  if x == 4 and (y < 6 or y > 6) then
     return 3
   end
   return 0
@@ -39,13 +39,16 @@ level:addTile({type=4,tile=tile})
 for _,t in pairs(level:getTiles()) do
   t.tile:getTexture():setFilter("nearest","nearest")
 end
+for _,e in pairs(level:getEntities()) do
+  e:getTexture():setFilter("nearest","nearest")
+end
 
 -- Enemy!
 entity = vividcast.entity.new()
-entity:setX(2)
-entity:setY(2)
+entity:setX(3.5)
+entity:setY(6.5)
 entity:setAngle(0)
-entity:setTexture(love.graphics.newImage("enemy.png"))
+entity:setTexture(love.graphics.newImage(art.."/enemy.png"))
 
 level:addEntity(entity)
 
@@ -139,8 +142,8 @@ function love.draw()
   level:draw(lx,ly,lw,lh,lolscale)
   love.graphics.print( love.timer.getFPS().." fps\n"..
     "FOV: "..level:getFOV().." rad\n"..
-    "Resolution: "..level:getRaycastResolution().."\n" ..
-    "Entity is ".. (#entity:getVisible()>0 and "" or "not ") .. "visible.")
+    "Resolution: "..level:getRaycastResolution().."\n" )--..
+--    "Entity is ".. (#entity:getVisible()>0 and "" or "not ") .. "visible.")
 
   -- Show a compass
   love.graphics.setColor(255,255,255)

@@ -20,9 +20,6 @@ function entity.new(init)
   self._quad=init.quad
   self.getQuad=entity.getQuad
   self.setQuad=entity.setQuad
-  self._visible=init.visible
-  self.getVisible=entity.getVisible
-  self.setVisible=entity.setVisible
 
   self:setTexture(init.texture)
 
@@ -61,7 +58,7 @@ function entity:setTexture(val)
   self._texture=val
   if val then
     local q = {}
-    for i = 1,val:getWidth() do
+    for i = 0,val:getWidth() do
       table.insert(q,
         love.graphics.newQuad(i,1,1,val:getHeight(),
           val:getWidth(),val:getHeight()))
@@ -76,14 +73,6 @@ end
 
 function entity:setQuad(val)
   self._quad=val
-end
-
-function entity:getVisible()
-  return self._visible
-end
-
-function entity:setVisible(val)
-  self._visible=val
 end
 
 return entity
