@@ -44,8 +44,16 @@ function level:draw(x,y,rw,rh,sx,sy)
         level.angle( self:getPlayer(), entity ) - math.pi )
       entity._vision_distance = level.distance( entity,self:getPlayer() )
       entity._vision_angle_width = math.atan2( 0.5, entity._vision_distance )
+    else
+      entity._vision_distance = 0
     end
   end
+
+  table.sort(self:getEntities(),
+    function(a,b)
+      return a._vision_distance > b._vision_distance
+    end
+  )
 
   local previous_ray_angle = level.normalize(
     self:getFOV()*(-1/w-0.5)+self:getPlayer():getAngle() )
