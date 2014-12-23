@@ -1,7 +1,7 @@
 vividcast = require "vividcast"
 
 art = "wolf3d"
-map_size = 30
+map_size = 10
 
 function map(x,y)
   if x == 1 or x == map_size then
@@ -44,13 +44,15 @@ for _,e in pairs(level:getEntities()) do
 end
 
 -- Enemy!
-entity = vividcast.entity.new()
-entity:setX(3.5)
-entity:setY(6.5)
-entity:setAngle(0)
-entity:setTexture(love.graphics.newImage(art.."/enemy.png"))
+for i = 1,map_size do
+  entity = vividcast.entity.new()
+  entity:setX( math.random(2,map_size-1)+0.5)
+  entity:setY( math.random(2,map_size-1)+0.5)
+  entity:setAngle(0)
+  entity:setTexture(love.graphics.newImage(art.."/enemy.png"))
 
-level:addEntity(entity)
+  level:addEntity(entity)
+end
 
 -- Player!
 player = vividcast.entity.new()
