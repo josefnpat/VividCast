@@ -1,4 +1,4 @@
-art = "xmas"
+art = "wolf3d"
 map_size = 10
 draw_scale = love.graphics.getHeight()/256
 
