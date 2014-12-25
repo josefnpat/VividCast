@@ -22,7 +22,6 @@ level = vividcast.level.new()
 level:setMapCallback(map)
 level:setRaycastRange( math.sqrt( map_size^2 + map_size^2) )
 level:setRaycastResolution(0.01)
-level:setFOV(math.pi*0.25)
 
 -- Tiles!
 tile = vividcast.tile.new()
@@ -81,14 +80,6 @@ function move(self,ix,iy)
 end
 
 function love.update(dt)
-
-  -- FOV
-  if love.keyboard.isDown("]") then
-    level:setFOV( level:getFOV() + dt )
-  end
-  if love.keyboard.isDown("[") then
-    level:setFOV( level:getFOV() - dt )
-  end
 
   -- RaycastResoluton
   if love.keyboard.isDown("=") then
@@ -168,7 +159,6 @@ function love.draw()
   end
 
   love.graphics.print( love.timer.getFPS().." fps\n"..
-    "FOV: "..level:getFOV().." rad\n"..
     "Resolution: "..level:getRaycastResolution().."\n" )
 
 end

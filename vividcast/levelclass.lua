@@ -60,12 +60,14 @@ function level:draw(x,y,rw,rh,sx,sy)
     end
   )
 
+  local FOV = self:getFOV(w,h)
+
   local previous_ray_angle = level.normalize(
-    self:getFOV()*(-1/w-0.5)+self:getPlayer():getAngle() )
+    FOV*(-1/w-0.5)+self:getPlayer():getAngle() )
 
   for i = 0,w do
     local ray_angle = level.normalize(
-      self:getFOV()*(i/w-0.5)+self:getPlayer():getAngle() )
+      FOV*(i/w-0.5)+self:getPlayer():getAngle() )
     local ray_x = self:getPlayer():getX()
     local ray_y = self:getPlayer():getY()
     local ray_length = 0
@@ -186,7 +188,6 @@ function level:checkCollision(rex,rey,used_entity_sprite)
 end
 
 -- LuaClassGen pregenerated functions
-
 function level.new(init)
   init = init or {}
   local self={}
@@ -212,6 +213,21 @@ function level.new(init)
   self._FOV=init.FOV
   self.getFOV=level.getFOV
   self.setFOV=level.setFOV
+  self._defaultFOVCallback=init.defaultFOVCallback or
+    function(w,h)
+      -- Using a source target aspect ratio of 4/3 and a given field of view in
+      -- angles, we can calculate the multipler.
+
+      -- 90 degrees (comfortable)
+      -- mult = (4/3) / math.rad(90) ~= 0.84882636315678
+      return w/h*0.84882636315678
+
+      -- 70 degrees (modern FPSs)
+      -- mult = (4/3) / math.rad(70) ~= 1.0913481812016
+      --return w/h*1.0913481812016
+    end
+  self.getDefaultFOVCallback=level.getDefaultFOVCallback
+  self.setDefaultFOVCallback=level.setDefaultFOVCallback
   self._raycastResolution=init.raycastResolution
   self.getRaycastResolution=level.getRaycastResolution
   self.setRaycastResolution=level.setRaycastResolution
@@ -242,12 +258,20 @@ function level:setMapCallback(val)
   self._mapCallback=val
 end
 
-function level:getFOV()
-  return self._FOV
+function level:getFOV(w,h)
+  return self._FOV or self:getDefaultFOVCallback()(w,h)
 end
 
 function level:setFOV(val)
   self._FOV=val
+end
+
+function level:getDefaultFOVCallback()
+  return self._defaultFOVCallback
+end
+
+function level:setDefaultFOVCallback(val)
+  self._defaultFOVCallback=val
 end
 
 function level:getRaycastResolution()
