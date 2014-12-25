@@ -22,6 +22,11 @@ function level.angle(a,b)
     a:getX()-b:getX())
 end
 
+function level.collision(r1x,r1y,r1w,r1h,r2x,r2y,r2w,r2h)
+  return
+    (math.max(r1x,r2x)<math.min(r1x+r1w,r2x+r2w)) and
+    (math.max(r1y,r2y)<math.min(r1y+r1h,r2y+r2h))
+end
 function level:draw(x,y,rw,rh,sx,sy)
   sx = sx or 1
   sy = sy or sx or 1
@@ -166,12 +171,27 @@ function level:draw(x,y,rw,rh,sx,sy)
 
 end
 
+function level:checkCollision(rex,rey,used_entity_sprite)
+  local ues = used_entity_sprite or 1
+  local ex,ey = math.floor(rex),math.floor(rey)
+  for tx = ex-1,ex+1 do
+    for ty = ey-1,ey+1 do
+      local tile_type = self:getMapCallback()(tx,ty)
+      local collision = level.collision(tx,ty,1,1,rex-ues/2,rey-ues/2,ues,ues)
+      if tile_type ~= 0 and collision then
+        return ex,ey
+      end
+    end
+  end
+end
+
 -- LuaClassGen pregenerated functions
 
 function level.new(init)
   init = init or {}
   local self={}
   self.draw=level.draw
+  self.checkCollision=level.checkCollision
   self._tiles={}
   self.addTile=level.addTile
   self.removeTile=level.removeTile
