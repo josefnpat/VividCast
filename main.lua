@@ -1,4 +1,3 @@
-vividcast = require "vividcast"
 
 art = "wolf3d"
 map_size = 10
@@ -15,6 +14,8 @@ function map(x,y)
   end
   return 0
 end
+
+vividcast = require "vividcast"
 
 -- Level!
 level = vividcast.level.new()
@@ -50,56 +51,36 @@ for i = 1,map_size do
   entity:setY( math.random(2,map_size-1)+0.5)
   entity:setAngle(0)
   entity:setTexture(love.graphics.newImage(art.."/enemy.png"))
-
   level:addEntity(entity)
 end
 
--- Player!
-player = vividcast.entity.new()
-player:setX(3)
-player:setY(3)
-player:setAngle(math.pi/2) -- start facing south
-player:setTexture(love.graphics.newImage("player.png"))
+players = {}
+controls = {
+  {"q","w","e","a","s","d"},
+  {"u","i","o","j","k","l"},
+}
+for i = 1,2 do
+  entity = vividcast.entity.new()
+  entity:setX(3)
+  entity:setY(3)
+  entity:setAngle(math.pi/2) -- start facing south
+  entity:setTexture(love.graphics.newImage(art.."/player.png"))
+  level:addEntity(entity)
+  players[i]={
+    entity=entity,
+    controls=controls[i]
+  }
+end
 
-level:addEntity(player)
-level:setPlayer(player)
-
-function move(ix,iy)
-  local x,y = player:getX()+ix,player:getY()+iy
-  if level:getMapCallback()(math.floor(x),math.floor(y)) == 0 then
-    player:setX(x)
-    player:setY(y)
+function move(self,ix,iy)
+  local x,y = self:getX()+ix,self:getY()+iy
+  if level:checkCollision(x,y,0.5) == nil then
+    self:setX(x)
+    self:setY(y)
   end
 end
 
 function love.update(dt)
-  local speed = 3
-
-  -- Move
-  if love.keyboard.isDown("w") then
-    move( math.cos(player:getAngle())*speed*dt,
-          math.sin(player:getAngle())*speed*dt )
-  end
-  if love.keyboard.isDown("s") then
-    move( math.cos(player:getAngle()+math.pi)*speed*dt,
-          math.sin(player:getAngle()+math.pi)*speed*dt )
-  end
-  -- Turn
-  if love.keyboard.isDown("a") then
-    player:setAngle( player:getAngle() - dt*math.pi )
-  end
-  if love.keyboard.isDown("d") then
-    player:setAngle( player:getAngle() + dt*math.pi )
-  end
-  -- Straife
-  if love.keyboard.isDown("q") then
-    move( math.cos(player:getAngle()-math.pi/2)*speed*dt,
-          math.sin(player:getAngle()-math.pi/2)*speed*dt )
-  end
-  if love.keyboard.isDown("e") then
-    move( math.cos(player:getAngle()+math.pi/2)*speed*dt,
-          math.sin(player:getAngle()+math.pi/2)*speed*dt )
-  end
 
   -- FOV
   if love.keyboard.isDown("]") then
@@ -119,6 +100,45 @@ function love.update(dt)
     )
   end
 
+  -- Player movement
+
+  local move_speed = 3
+  local turn_speed = math.pi
+  for _,player in pairs(players) do
+    -- Move forward
+    if love.keyboard.isDown(player.controls[2]) then
+      move( player.entity,
+            math.cos(player.entity:getAngle())*move_speed*dt,
+            math.sin(player.entity:getAngle())*move_speed*dt )
+    end
+    -- Move backwards
+    if love.keyboard.isDown(player.controls[5]) then
+      move( player.entity,
+            math.cos(player.entity:getAngle()+math.pi)*move_speed*dt,
+            math.sin(player.entity:getAngle()+math.pi)*move_speed*dt )
+    end
+    -- Turn left
+    if love.keyboard.isDown(player.controls[4]) then
+      player.entity:setAngle( player.entity:getAngle()-turn_speed*dt )
+    end
+    -- Turn right
+    if love.keyboard.isDown(player.controls[6]) then
+      player.entity:setAngle( player.entity:getAngle()+turn_speed*dt )
+    end
+    -- Strafe left
+    if love.keyboard.isDown(player.controls[1]) then
+      move( player.entity,
+            math.cos(player.entity:getAngle()-math.pi/2)*move_speed*dt,
+            math.sin(player.entity:getAngle()-math.pi/2)*move_speed*dt )
+    end
+    -- Strafe right
+    if love.keyboard.isDown(player.controls[3]) then
+      move( player.entity,
+            math.cos(player.entity:getAngle()+math.pi/2)*move_speed*dt,
+            math.sin(player.entity:getAngle()+math.pi/2)*move_speed*dt )
+    end
+  end
+
 end
 
 bg = love.graphics.newImage(art.."/bg.png")
@@ -126,35 +146,30 @@ bg = love.graphics.newImage(art.."/bg.png")
 function love.draw()
   love.graphics.setColor(255,255,255)
   local lx,ly,lw,lh = 32,32,
-    love.graphics.getWidth()-64,
+    love.graphics.getWidth()/2-64,
     love.graphics.getHeight()-64
+  local w = love.graphics.getWidth()/2
+  local lolscale = 1--love.graphics.getHeight()/256
 
-  -- Draw a fun paralaxing background!
-  love.graphics.setScissor(lx,ly,lw,lh)
-  love.graphics.draw(bg,
-    lx-(player:getAngle()/(math.pi/2)*lw)%lw,
-    ly,0,lw/bg:getWidth(),lh/bg:getHeight())
-  love.graphics.draw(bg,
-    lx+lw-(player:getAngle()/(math.pi/2)*lw)%lw,
-    ly,0,lw/bg:getWidth(),lh/bg:getHeight())
-  love.graphics.setScissor()
+  for i,player in pairs(players) do
 
-  local lolscale = love.graphics.getHeight()/256
+    -- Draw a fun paralaxing background!
+    love.graphics.setScissor(lx+w*(i-1),ly,lw,lh)
+    love.graphics.draw(bg,
+      w*(i-1)+lx-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
+      ly,0,lw/bg:getWidth(),lh/bg:getHeight())
+    love.graphics.draw(bg,
+      w*(i-1)+lx+lw-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
+      ly,0,lw/bg:getWidth(),lh/bg:getHeight())
+    love.graphics.setScissor()
 
-  level:draw(lx,ly,lw,lh,lolscale)
+    -- Draw the level in relation to the current player
+    level:setPlayer(player.entity)
+    level:draw((i-1)*w+lx,ly,lw,lh,lolscale)
+  end
+
   love.graphics.print( love.timer.getFPS().." fps\n"..
     "FOV: "..level:getFOV().." rad\n"..
-    "Resolution: "..level:getRaycastResolution().."\n" )--..
---    "Entity is ".. (#entity:getVisible()>0 and "" or "not ") .. "visible.")
-
-  -- Show a compass
-  love.graphics.setColor(255,255,255)
-  love.graphics.arc("line",64,64,32,
-    player:getAngle()-0.1+math.pi,
-    player:getAngle()+0.1+math.pi)
-  love.graphics.setColor(255,0,0)
-  love.graphics.arc("fill",64,64,32,
-    player:getAngle()-0.1,
-    player:getAngle()+0.1)
+    "Resolution: "..level:getRaycastResolution().."\n" )
 
 end
