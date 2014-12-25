@@ -1,6 +1,6 @@
 art = "wolf3d"
 map_size = 10
-draw_scale = love.graphics.getHeight()/256
+draw_scale = 512/256
 
 function map(x,y)
   if x == 1 or x == map_size then
