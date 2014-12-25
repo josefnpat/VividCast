@@ -1,6 +1,6 @@
-
-art = "wolf3d"
+art = "xmas"
 map_size = 10
+draw_scale = love.graphics.getHeight()/256
 
 function map(x,y)
   if x == 1 or x == map_size then
@@ -149,7 +149,6 @@ function love.draw()
     love.graphics.getWidth()/2-64,
     love.graphics.getHeight()-64
   local w = love.graphics.getWidth()/2
-  local lolscale = 1--love.graphics.getHeight()/256
 
   for i,player in pairs(players) do
 
@@ -165,7 +164,7 @@ function love.draw()
 
     -- Draw the level in relation to the current player
     level:setPlayer(player.entity)
-    level:draw((i-1)*w+lx,ly,lw,lh,lolscale)
+    level:draw((i-1)*w+lx,ly,lw,lh,draw_scale)
   end
 
   love.graphics.print( love.timer.getFPS().." fps\n"..
