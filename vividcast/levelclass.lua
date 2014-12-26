@@ -79,8 +79,8 @@ function level:draw(x,y,rw,rh,sx,sy)
       ray_y = ray_y + math.sin(ray_angle) * self:getRaycastResolution()
       ray_length = ray_length + self:getRaycastResolution()
 
-      new_x = math.floor(ray_x)
-      new_y = math.floor(ray_y)
+      local new_x = math.floor(ray_x)
+      local new_y = math.floor(ray_y)
       if current_x ~= new_x or current_y ~= new_y then
         current_x,current_y = new_x,new_y
       end
@@ -105,7 +105,7 @@ function level:draw(x,y,rw,rh,sx,sy)
       local ray_xdist = math.abs(1-ray_x%1)
       local ray_ydist = math.abs(1-ray_y%1)
 
-      local invert
+      local distance,invert
       if ray_xdist > 1-self:getRaycastResolution() then
         distance = ray_y%1 -- east
         invert = false
