@@ -39,9 +39,6 @@ level:addTile({type=4,tile=tile})
 for _,t in pairs(level:getTiles()) do
   t.tile:getTexture():setFilter("nearest","nearest")
 end
-for _,e in pairs(level:getEntities()) do
-  e:getTexture():setFilter("nearest","nearest")
-end
 
 -- Enemy!
 for i = 1,map_size do
@@ -51,6 +48,10 @@ for i = 1,map_size do
   entity:setAngle(0)
   entity:setTexture(love.graphics.newImage(art.."/enemy.png"))
   level:addEntity(entity)
+end
+
+for _,e in pairs(level:getEntities()) do
+  e:getTexture():setFilter("nearest","nearest")
 end
 
 players = {}
