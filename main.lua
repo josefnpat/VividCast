@@ -56,7 +56,7 @@ end
 
 players = {}
 controls = {
-  {"q","w","e","a","s","d"},
+  {"a","w","d","q","s","e"},
   {"u","i","o","j","k","l"},
 }
 for i = 1,2 do
@@ -81,6 +81,10 @@ function move(self,ix,iy)
 end
 
 function love.update(dt)
+  local offset = love.mouse.getX() - love.graphics.getWidth() / 2
+  local scale = (offset / (love.graphics.getWidth() / 2)) * 20
+  players[1].entity:setAngle( players[1].entity:getAngle()+scale*dt )
+  love.mouse.setX(love.graphics.getWidth() / 2)
 
   -- RaycastResoluton
   if love.keyboard.isDown("=") then
