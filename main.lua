@@ -40,18 +40,27 @@ for _,t in pairs(level:getTiles()) do
   t.tile:getTexture():setFilter("nearest","nearest")
 end
 
+enemy_directions = {
+  love.graphics.newImage(art.."/enemy.png")
+}
+player_directions = {
+  love.graphics.newImage(art.."/player.png")
+}
+
 -- Enemy!
 for i = 1,map_size do
   entity = vividcast.entity.new()
   entity:setX( math.random(2,map_size-1)+0.5)
   entity:setY( math.random(2,map_size-1)+0.5)
   entity:setAngle(0)
-  entity:setTexture(love.graphics.newImage(art.."/enemy.png"))
+  entity:setTexture(function(angle) return enemy_directions[1] end)
   level:addEntity(entity)
 end
 
-for _,e in pairs(level:getEntities()) do
-  e:getTexture():setFilter("nearest","nearest")
+for _,entity_directions in pairs({enemy_directions,player_directions}) do
+  for _,entity_direction in pairs(entity_directions) do
+    entity_direction:setFilter("nearest","nearest")
+  end
 end
 
 players = {}
@@ -64,7 +73,7 @@ for i = 1,2 do
   entity:setX(3)
   entity:setY(3)
   entity:setAngle(math.pi/2) -- start facing south
-  entity:setTexture(love.graphics.newImage(art.."/player.png"))
+  entity:setTexture(function(angle) return player_directions[1] end)
   level:addEntity(entity)
   players[i]={
     entity=entity,
