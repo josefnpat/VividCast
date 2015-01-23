@@ -40,21 +40,27 @@ for _,t in pairs(level:getTiles()) do
   t.tile:getTexture():setFilter("nearest","nearest")
 end
 
-enemy_directions = {
-  love.graphics.newImage(art.."/enemy.png")
-}
-player_directions = {
-  love.graphics.newImage(art.."/player.png")
-}
+enemy_directions = {}
+player_directions = {}
+for i = 0,7 do
+  enemy_directions[i]  = love.graphics.newImage(art.."/enemy_"..i..".png")
+  player_directions[i] = love.graphics.newImage(art.."/player_"..i..".png")
+end
+
+function calc_direction(angle)
+  return math.floor(((angle+math.pi/8)/(math.pi*2))*8)%8
+end
 
 -- Enemy!
+enemies = {}
 for i = 1,map_size do
   entity = vividcast.entity.new()
   entity:setX( math.random(2,map_size-1)+0.5)
   entity:setY( math.random(2,map_size-1)+0.5)
   entity:setAngle(0)
-  entity:setTexture(function(angle) return enemy_directions[1] end)
+  entity:setTexture(function(this,angle) return enemy_directions[calc_direction(angle)] end)
   level:addEntity(entity)
+  table.insert(enemies,entity)
 end
 
 for _,entity_directions in pairs({enemy_directions,player_directions}) do
@@ -73,7 +79,7 @@ for i = 1,2 do
   entity:setX(3)
   entity:setY(3)
   entity:setAngle(math.pi/2) -- start facing south
-  entity:setTexture(function(angle) return player_directions[1] end)
+  entity:setTexture(function(self,angle) return player_directions[calc_direction(angle)] end)
   level:addEntity(entity)
   players[i]={
     entity=entity,
@@ -106,6 +112,10 @@ function love.update(dt)
   end
 
   -- Player movement
+
+  for _,enemy in pairs(enemies) do
+    enemy:setAngle( enemy:getAngle() + dt )
+  end
 
   local move_speed = 3
   local turn_speed = math.pi

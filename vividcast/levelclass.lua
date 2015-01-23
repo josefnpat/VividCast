@@ -27,6 +27,7 @@ function level.collision(r1x,r1y,r1w,r1h,r2x,r2y,r2w,r2h)
     (math.max(r1x,r2x)<math.min(r1x+r1w,r2x+r2w)) and
     (math.max(r1y,r2y)<math.min(r1y+r1h,r2y+r2h))
 end
+
 function level:draw(x,y,rw,rh,sx,sy)
   sx = sx or 1
   sy = sy or sx or 1
@@ -152,10 +153,12 @@ function level:draw(x,y,rw,rh,sx,sy)
           local darkness = (1-entity._vision_distance/self:getRaycastRange())*255
           love.graphics.setColor(darkness,darkness,darkness)
           local draw_height = h/entity._vision_distance
+
+          local view_angle = entity:getAngle() - level.angle(entity,self:getPlayer()) + math.pi
           local texture_scale = draw_height/entity:getTexture():getHeight()
           local texture_quad = math.floor(distance*#entity:getQuad())+1
           love.graphics.draw(
-            entity:getTexture(),
+            entity:getTexture(view_angle),
             entity:getQuad()[texture_quad],
             i, (h-draw_height)/2,0,
             1,texture_scale)

@@ -47,12 +47,18 @@ function entity:getAngle()
 end
 
 function entity:setAngle(val)
+  while val < 0 do
+    val = val + math.pi*2
+  end
+  while val >= math.pi*2 do
+    val = val - math.pi*2
+  end
   self._angle=val
 end
 
 function entity:getTexture(angle)
   if type(self._texture) == "function" then
-    return self._texture(angle or 0)
+    return self:_texture(angle or 0)
   else
     return self._texture
   end
@@ -61,7 +67,7 @@ end
 function entity:setTexture(val)
   self._texture=val
   if type(self._texture) == "function" then
-    val = self._texture(0)
+    val = self:_texture(0)
   end
   if val then
     local q = {}
