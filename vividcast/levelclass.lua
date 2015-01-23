@@ -141,14 +141,56 @@ function level:draw(x,y,rw,rh,sx,sy)
 
     for _,entity in pairs(self:getEntities()) do
       if entity ~= self:getPlayer() then
+
+        local vision_sub = entity._vision_angle-entity._vision_angle_width
+        local vision_add = entity._vision_angle+entity._vision_angle_width
+
+        local is_within_range_std =
+          vision_sub<=ray_angle and
+          vision_add>previous_ray_angle
+
+        local is_within_range_left =
+          vision_sub<=ray_angle-math.pi*2 and
+          vision_add>previous_ray_angle-math.pi*2
+
+        local is_within_range_right =
+          vision_sub<=ray_angle+math.pi*2 and
+          vision_add>previous_ray_angle+math.pi*2
+
+-- TODO: make this work!
+--[[
+        local is_within_range_zero =
+          ray_angle < previous_ray_angle
+
+        if not printed and previous_ray_angle == 0 then
+          printed = true
+          print("ray angle:",ray_angle)
+          print("previous ray angle:",previous_ray_angle)
+          print("vision_sub",vision_sub)
+          print("vision_add",vision_add)
+--          love.event.quit()
+        end
+--]]
+
+        local is_within_range = is_within_range_std or is_within_range_left or is_within_range_right or is_within_range_zero
+
         if entity._vision_distance < ray_length and
           entity._vision_distance < self:getRaycastRange() and
-          entity._vision_angle-entity._vision_angle_width<=ray_angle and
-          entity._vision_angle+entity._vision_angle_width>previous_ray_angle then
-          local distance = ( ( (ray_angle+previous_ray_angle)/2 - entity._vision_angle ) /
-            entity._vision_angle_width +1) /2
-          if distance > 1 then distance = distance-1 end
-          if distance < 0 then distance = distance+1 end
+          is_within_range then
+
+          local ray_average = (ray_angle+previous_ray_angle)/2
+
+          local zero_fix = is_within_range_left and -math.pi*2 or
+                           is_within_range_right and math.pi*2 or 0
+          local distance = ( ( ray_average - entity._vision_angle + zero_fix ) /
+              entity._vision_angle_width + 1 ) /2
+
+          distance = math.min(0.999999999,math.max(0,distance))
+
+          if is_within_range_zero then
+            distance = 0.5
+          end
+
 
           local darkness = (1-entity._vision_distance/self:getRaycastRange())*255
           love.graphics.setColor(darkness,darkness,darkness)

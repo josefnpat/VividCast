@@ -46,7 +46,9 @@ enemy_directions = {}
 player_directions = {}
 for i = 0,7 do
   enemy_directions[i]  = love.graphics.newImage(art.."/enemy_"..i..".png")
+  enemy_directions[i]:setFilter("nearest","nearest")
   player_directions[i] = love.graphics.newImage(art.."/player_"..i..".png")
+  player_directions[i]:setFilter("nearest","nearest")
 end
 
 function calc_direction(angle)
@@ -63,12 +65,6 @@ for i = 1,map_size do
   entity:setTexture(function(this,angle) return enemy_directions[calc_direction(angle)] end)
   level:addEntity(entity)
   table.insert(enemies,entity)
-end
-
-for _,entity_directions in pairs({enemy_directions,player_directions}) do
-  for _,entity_direction in pairs(entity_directions) do
-    entity_direction:setFilter("nearest","nearest")
-  end
 end
 
 players = {}
