@@ -157,6 +157,7 @@ function level:draw(x,y,rw,rh,sx,sy)
           vision_sub<=ray_angle+math.pi*2 and
           vision_add>previous_ray_angle+math.pi*2
 
+        local is_within_range_zero = false
 -- TODO: make this work!
 --[[
         local is_within_range_zero =
