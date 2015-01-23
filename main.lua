@@ -1,3 +1,5 @@
+require "strict"
+
 art = "wolf3d"
 map_size = 10
 draw_scale = 512/256
