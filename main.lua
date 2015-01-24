@@ -22,6 +22,20 @@ end
 
 vividcast = require "vividcast"
 
+level = nil
+enemy_directions = {}
+player_directions = {}
+enemies = {}
+players = {}
+controls = {
+  {"a","w","d","q","s","e"},
+  {"r","t","y","f","g","h"},
+  {"u","i","o","j","k","l"},
+  {"pageup","up","pagedown","left","down","right"}
+}
+
+
+
 function love.load()
   -- Level!
   level = vividcast.level.new()
@@ -30,6 +44,8 @@ function love.load()
   level:setRaycastResolution(default_resolution)
 
   -- Tiles!
+  local tile
+
   tile = vividcast.tile.new()
   tile:setTexture(love.graphics.newImage(art.."/brick.png"))
   level:addTile({type=5,tile=tile})
@@ -46,8 +62,6 @@ function love.load()
     t.tile:getTexture():setFilter("nearest","nearest")
   end
 
-  enemy_directions = {}
-  player_directions = {}
   for i = 0,7 do
     enemy_directions[i]  = love.graphics.newImage(art.."/enemy_"..i..".png")
     enemy_directions[i]:setFilter("nearest","nearest")
@@ -56,9 +70,8 @@ function love.load()
   end
 
   -- Enemy!
-  enemies = {}
   for i = 1,map_size do
-    entity = vividcast.entity.new()
+    local entity = vividcast.entity.new()
     entity:setX( math.random(2,map_size-1)+0.5)
     entity:setY( math.random(2,map_size-1)+0.5)
     entity:setAngle(0)
@@ -68,16 +81,8 @@ function love.load()
     table.insert(enemies,entity)
   end
 
-  players = {}
-  controls = {
-    {"a","w","d","q","s","e"},
-    {"r","t","y","f","g","h"},
-    {"u","i","o","j","k","l"},
-    {"pageup","up","pagedown","left","down","right"}
-  }
-
   for i = 1,#controls do
-    entity = vividcast.entity.new()
+    local entity = vividcast.entity.new()
     entity:setX(2+i)
     entity:setY(3)
     entity:setAngle(math.pi/2) -- start facing south
