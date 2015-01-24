@@ -1,4 +1,4 @@
---require "strict"
+require "strict"
 
 art = "wolf3d"
 map_size = 11
