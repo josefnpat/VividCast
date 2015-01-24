@@ -1,8 +1,8 @@
-require "strict"
+--require "strict"
 
 art = "wolf3d"
-map_size = 10
-draw_scale = 512/256
+map_size = 11
+default_resolution = 0.01
 
 function map(x,y)
   if x == 1 or x == map_size then
@@ -11,7 +11,10 @@ function map(x,y)
   if y == 1 or y == map_size then
     return 4
   end
-  if x == 4 and (y < 6 or y > 6) then
+  if x == 7 and (y < 6 or y > 6) then
+    return 3
+  end
+  if x == 4 and y == 6 then
     return 3
   end
   return 0
@@ -19,70 +22,78 @@ end
 
 vividcast = require "vividcast"
 
--- Level!
-level = vividcast.level.new()
-level:setMapCallback(map)
-level:setRaycastRange( math.sqrt( map_size^2 + map_size^2) )
-level:setRaycastResolution(0.01)
+function love.load()
+  -- Level!
+  level = vividcast.level.new()
+  level:setMapCallback(map)
+  level:setRaycastRange( math.sqrt( map_size^2 + map_size^2) )
+  level:setRaycastResolution(default_resolution)
 
--- Tiles!
-tile = vividcast.tile.new()
-tile:setTexture(love.graphics.newImage(art.."/brick.png"))
-level:addTile({type=5,tile=tile})
+  -- Tiles!
+  tile = vividcast.tile.new()
+  tile:setTexture(love.graphics.newImage(art.."/brick.png"))
+  level:addTile({type=5,tile=tile})
 
-tile = vividcast.tile.new()
-tile:setTexture(love.graphics.newImage(art.."/curtian.png"))
-level:addTile({type=3,tile=tile})
+  tile = vividcast.tile.new()
+  tile:setTexture(love.graphics.newImage(art.."/curtian.png"))
+  level:addTile({type=3,tile=tile})
 
-tile = vividcast.tile.new()
-tile:setTexture(love.graphics.newImage(art.."/cobble.png"))
-level:addTile({type=4,tile=tile})
+  tile = vividcast.tile.new()
+  tile:setTexture(love.graphics.newImage(art.."/cobble.png"))
+  level:addTile({type=4,tile=tile})
 
-for _,t in pairs(level:getTiles()) do
-  t.tile:getTexture():setFilter("nearest","nearest")
-end
+  for _,t in pairs(level:getTiles()) do
+    t.tile:getTexture():setFilter("nearest","nearest")
+  end
 
-enemy_directions = {}
-player_directions = {}
-for i = 0,7 do
-  enemy_directions[i]  = love.graphics.newImage(art.."/enemy_"..i..".png")
-  enemy_directions[i]:setFilter("nearest","nearest")
-  player_directions[i] = love.graphics.newImage(art.."/player_"..i..".png")
-  player_directions[i]:setFilter("nearest","nearest")
+  enemy_directions = {}
+  player_directions = {}
+  for i = 0,7 do
+    enemy_directions[i]  = love.graphics.newImage(art.."/enemy_"..i..".png")
+    enemy_directions[i]:setFilter("nearest","nearest")
+    player_directions[i] = love.graphics.newImage(art.."/player_"..i..".png")
+    player_directions[i]:setFilter("nearest","nearest")
+  end
+
+  -- Enemy!
+  enemies = {}
+  for i = 1,map_size do
+    entity = vividcast.entity.new()
+    entity:setX( math.random(2,map_size-1)+0.5)
+    entity:setY( math.random(2,map_size-1)+0.5)
+    entity:setAngle(0)
+    entity:setTexture(function(this,angle)
+      return enemy_directions[calc_direction(angle)] end)
+    level:addEntity(entity)
+    table.insert(enemies,entity)
+  end
+
+  players = {}
+  controls = {
+    {"a","w","d","q","s","e"},
+    {"r","t","y","f","g","h"},
+    {"u","i","o","j","k","l"},
+    {"pageup","up","pagedown","left","down","right"}
+  }
+
+  for i = 1,#controls do
+    entity = vividcast.entity.new()
+    entity:setX(2+i)
+    entity:setY(3)
+    entity:setAngle(math.pi/2) -- start facing south
+    entity:setTexture(function(self,angle)
+      return player_directions[calc_direction(angle)] end)
+    level:addEntity(entity)
+    players[i]={
+      entity=entity,
+      controls=controls[i]
+    }
+  end
+
 end
 
 function calc_direction(angle)
   return math.floor(((angle+math.pi/8)/(math.pi*2))*8)%8
-end
-
--- Enemy!
-enemies = {}
-for i = 1,map_size do
-  entity = vividcast.entity.new()
-  entity:setX( math.random(2,map_size-1)+0.5)
-  entity:setY( math.random(2,map_size-1)+0.5)
-  entity:setAngle(0)
-  entity:setTexture(function(this,angle) return enemy_directions[calc_direction(angle)] end)
-  level:addEntity(entity)
-  table.insert(enemies,entity)
-end
-
-players = {}
-controls = {
-  {"a","w","d","q","s","e"},
-  {"u","i","o","j","k","l"},
-}
-for i = 1,2 do
-  entity = vividcast.entity.new()
-  entity:setX(3)
-  entity:setY(3)
-  entity:setAngle(math.pi/2) -- start facing south
-  entity:setTexture(function(self,angle) return player_directions[calc_direction(angle)] end)
-  level:addEntity(entity)
-  players[i]={
-    entity=entity,
-    controls=controls[i]
-  }
 end
 
 function move(self,ix,iy)
@@ -96,8 +107,10 @@ end
 function love.update(dt)
   local offset = love.mouse.getX() - love.graphics.getWidth() / 2
   local scale = (offset / (love.graphics.getWidth() / 2)) * 20
-  players[1].entity:setAngle( players[1].entity:getAngle()+scale*dt )
-  love.mouse.setX(love.graphics.getWidth() / 2)
+  if use_mouse then
+    players[1].entity:setAngle( players[1].entity:getAngle()+scale*dt )
+    love.mouse.setX(love.graphics.getWidth() / 2)
+  end
 
   -- RaycastResoluton
   if love.keyboard.isDown("=") then
@@ -109,12 +122,12 @@ function love.update(dt)
     )
   end
 
-  -- Player movement
-
+  -- Enemy rotation
   for _,enemy in pairs(enemies) do
     enemy:setAngle( enemy:getAngle() + dt )
   end
 
+  -- Player movement
   local move_speed = 3
   local turn_speed = math.pi
   for _,player in pairs(players) do
@@ -158,29 +171,47 @@ bg = love.graphics.newImage(art.."/bg.png")
 
 function love.draw()
   love.graphics.setColor(255,255,255)
-  local lx,ly,lw,lh = 32,32,
-    love.graphics.getWidth()/2-64,
-    love.graphics.getHeight()-64
-  local w = love.graphics.getWidth()/2
+
+  local padding = 16
+
+  local lw = love.graphics.getWidth()/2 - padding*2
+  local lh = love.graphics.getHeight()/2 - padding*2
 
   for i,player in pairs(players) do
 
+    local player_x = (i-1)%2
+    local player_y = math.floor((i-1)/2)
+
+    local lx = player_x*love.graphics.getWidth()/2 + padding
+    local ly = player_y*love.graphics.getHeight()/2 + padding
+
     -- Draw a fun paralaxing background!
-    love.graphics.setScissor(lx+w*(i-1),ly,lw,lh)
+    love.graphics.setScissor(lx,ly,lw,lh)
     love.graphics.draw(bg,
-      w*(i-1)+lx-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
+      lx-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
       ly,0,lw/bg:getWidth(),lh/bg:getHeight())
     love.graphics.draw(bg,
-      w*(i-1)+lx+lw-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
+      lx+lw-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
       ly,0,lw/bg:getWidth(),lh/bg:getHeight())
     love.graphics.setScissor()
 
     -- Draw the level in relation to the current player
     level:setPlayer(player.entity)
-    level:draw((i-1)*w+lx,ly,lw,lh,draw_scale)
+
+    local draw_scale = (love.graphics.getHeight()/2)/128
+    level:draw(lx,ly,lw,lh,draw_scale)
+    --love.graphics.rectangle("line",lx,ly,lw,lh)
+    love.graphics.print("Player "..i,lx+padding,ly+padding)
   end
 
   love.graphics.print( love.timer.getFPS().." fps\n"..
     "Resolution: "..level:getRaycastResolution().."\n" )
 
+end
+
+use_mouse = false
+function love.keypressed(key)
+  if key == "`" then
+    use_mouse = not use_mouse
+  end
 end
