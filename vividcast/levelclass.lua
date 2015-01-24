@@ -1,7 +1,7 @@
 local level = {}
 
 function level.normalize(i)
-  while i < 0 do
+  while i <= 0 do
     i = i + math.pi*2
   end
   while i > math.pi*2 do
@@ -63,8 +63,7 @@ function level:draw(x,y,rw,rh,sx,sy)
 
   local FOV = self:getFOV(w,h)
 
-  local previous_ray_angle = level.normalize(
-    FOV*(-1/w-0.5)+self:getPlayer():getAngle() )
+  local previous_ray_angle = FOV*(-1/w-0.5)+self:getPlayer():getAngle()
 
   for i = 0,w do
     local ray_angle = level.normalize(
