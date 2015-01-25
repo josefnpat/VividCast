@@ -73,10 +73,12 @@ function level:draw(x,y,rw,rh,sx,sy)
     local ray_length = 0
 
     local current_x,current_y
+    local ray_x_step = math.cos(ray_angle) * self:getRaycastResolution()
+    local ray_y_step = math.sin(ray_angle) * self:getRaycastResolution()
 
     repeat
-      ray_x = ray_x + math.cos(ray_angle) * self:getRaycastResolution()
-      ray_y = ray_y + math.sin(ray_angle) * self:getRaycastResolution()
+      ray_x = ray_x + ray_x_step
+      ray_y = ray_y + ray_y_step
       ray_length = ray_length + self:getRaycastResolution()
 
       local new_x = math.floor(ray_x)
