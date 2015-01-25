@@ -38,6 +38,7 @@ function level:draw(x,y,rw,rh,sx,sy)
     self._last_w = w
     self._last_h = h
     self._canvas = love.graphics.newCanvas(w,h)
+    self._canvas:setFilter( "nearest", "nearest" )
   else
     self._canvas:clear()
   end
