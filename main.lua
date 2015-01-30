@@ -56,6 +56,7 @@ function love.load()
 
   tile = vividcast.tile.new()
   tile:setTexture(love.graphics.newImage(art.."/cobble.png"))
+  tile:setColor({255,0,0})
   level:addTile({type=4,tile=tile})
 
   for _,t in pairs(level:getTiles()) do

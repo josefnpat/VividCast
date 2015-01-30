@@ -1,5 +1,7 @@
 local tile = {}
 
+tile._color_default = {255,255,255}
+
 -- LuaClassGen pregenerated functions
 
 function tile.new(init)
@@ -11,6 +13,9 @@ function tile.new(init)
   self._quad=init.quad
   self.getQuad=tile.getQuad
   self.setQuad=tile.setQuad
+  self._color=tile._color_default
+  self.getColor=tile.getColor
+  self.setColor=tile.setColor
 
   self:setTexture(init.texture)
 
@@ -40,6 +45,14 @@ end
 
 function tile:setQuad(val)
   self._quad=val
+end
+
+function tile:getColor()
+  return self._color
+end
+
+function tile:setColor(val)
+  self._color=val
 end
 
 return tile

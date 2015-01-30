@@ -1,5 +1,7 @@
 local entity = {}
 
+entity._color_default = {255,255,255}
+
 -- LuaClassGen pregenerated functions
 
 function entity.new(init)
@@ -20,7 +22,7 @@ function entity.new(init)
   self._quad=init.quad
   self.getQuad=entity.getQuad
   self.setQuad=entity.setQuad
-  self._color={255,255,255}
+  self._color=entity._color_default
   self.getColor=entity.getColor
   self.setColor=entity.setColor
 
@@ -98,6 +100,5 @@ end
 function entity:setColor(val)
   self._color=val
 end
-
 
 return entity

@@ -103,7 +103,7 @@ function level:draw(x,y,rw,rh,sx,sy)
       assert(tile,"Tile type `"..tile_type.."` not set.")
 
       local draw_height = h/ray_length
-      local darkness = (1-ray_length/self:getRaycastRange())*255
+      local darkness = (1-ray_length/self:getRaycastRange())
 
       local ray_xdist = math.abs(1-ray_x%1)
       local ray_ydist = math.abs(1-ray_y%1)
@@ -125,8 +125,8 @@ function level:draw(x,y,rw,rh,sx,sy)
         distance = 0
       end
 
-      love.graphics.setColor(darkness,darkness,darkness)
-
+      local color = tile:getColor()
+      love.graphics.setColor(color[1]*darkness,color[2]*darkness,color[3]*darkness)
       local texture_scale = draw_height/tile:getTexture():getHeight()
       local texture_quad
       if invert then
@@ -195,8 +195,9 @@ function level:draw(x,y,rw,rh,sx,sy)
           end
 
 
-          local darkness = (1-entity._vision_distance/self:getRaycastRange())*255
-          love.graphics.setColor(darkness,darkness,darkness)
+          local darkness = (1-entity._vision_distance/self:getRaycastRange())
+          local color = entity:getColor()
+          love.graphics.setColor(color[1]*darkness,color[2]*darkness,color[3]*darkness)
           local draw_height = h/entity._vision_distance
 
           local view_angle = entity:getAngle() - level.angle(entity,self:getPlayer()) + math.pi
