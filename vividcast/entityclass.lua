@@ -20,6 +20,9 @@ function entity.new(init)
   self._quad=init.quad
   self.getQuad=entity.getQuad
   self.setQuad=entity.setQuad
+  self._color={255,255,255}
+  self.getColor=entity.getColor
+  self.setColor=entity.setColor
 
   self:setTexture(init.texture)
 
@@ -87,5 +90,14 @@ end
 function entity:setQuad(val)
   self._quad=val
 end
+
+function entity:getColor()
+  return self._color
+end
+
+function entity:setColor(val)
+  self._color=val
+end
+
 
 return entity

@@ -72,6 +72,13 @@ function love.load()
   -- Enemy!
   for i = 1,map_size do
     local entity = vividcast.entity.new()
+
+    local color = {0,0,0}
+    color[math.random(1,3)] = 255
+
+    entity:setColor(color)
+
+
     entity:setX( math.random(2,map_size-1)+0.5)
     entity:setY( math.random(2,map_size-1)+0.5)
     entity:setAngle(0)
