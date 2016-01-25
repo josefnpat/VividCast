@@ -1,13 +1,7 @@
 local level = {}
 
 function level.normalize(i)
-  while i <= 0 do
-    i = i + math.pi*2
-  end
-  while i > math.pi*2 do
-    i = i - math.pi*2
-  end
-  return i
+  return i%(math.pi*2)
 end
 
 function level.distance(a,b)
