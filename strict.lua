@@ -30,11 +30,10 @@ mt.__newindex = function (t, n, v)
   end
   rawset(t, n, v)
 end
-  
+
 mt.__index = function (t, n)
   if not mt.__declared[n] and what() ~= "C" then
     error("variable '"..n.."' is not declared", 2)
   end
   return rawget(t, n)
 end
-
