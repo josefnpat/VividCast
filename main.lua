@@ -1,10 +1,10 @@
 require "strict"
 
-art = "wolf3d"
-map_size = 11
-default_resolution = 0.01
+local art = "wolf3d"
+local map_size = 11
+local default_resolution = 0.01
 
-function map(x,y)
+local function map(x,y)
   if x == 1 or x == map_size then
     return 5
   end
@@ -20,21 +20,25 @@ function map(x,y)
   return 0
 end
 
-vividcast = require "vividcast"
+local vividcast = require "vividcast"
 
-level = nil
-enemy_directions = {}
-player_directions = {}
-enemies = {}
-players = {}
-controls = {
+local use_mouse = false
+
+local level = nil
+local enemy_directions = {}
+local player_directions = {}
+local enemies = {}
+local players = {}
+local controls = {
   {"a","w","d","q","s","e"},
   {"r","t","y","f","g","h"},
   {"u","i","o","j","k","l"},
   {"pageup","up","pagedown","left","down","right"}
 }
 
-
+local function calc_direction(angle)
+  return math.floor(((angle+math.pi/8)/(math.pi*2))*8)%8
+end
 
 function love.load()
   -- Level!
@@ -71,7 +75,7 @@ function love.load()
   end
 
   -- Enemy!
-  for i = 1,map_size do
+  for _=1, map_size do
     local entity = vividcast.entity.new()
 
     local color = {0,0,0}
@@ -83,7 +87,7 @@ function love.load()
     entity:setX( math.random(2,map_size-1)+0.5)
     entity:setY( math.random(2,map_size-1)+0.5)
     entity:setAngle(0)
-    entity:setTexture(function(this,angle)
+    entity:setTexture(function(_, angle)
       return enemy_directions[calc_direction(angle)] end)
     level:addEntity(entity)
     table.insert(enemies,entity)
@@ -94,7 +98,7 @@ function love.load()
     entity:setX(2+i)
     entity:setY(3)
     entity:setAngle(math.pi/2) -- start facing south
-    entity:setTexture(function(self,angle)
+    entity:setTexture(function(_,angle)
       return player_directions[calc_direction(angle)] end)
     level:addEntity(entity)
     players[i]={
@@ -105,11 +109,7 @@ function love.load()
 
 end
 
-function calc_direction(angle)
-  return math.floor(((angle+math.pi/8)/(math.pi*2))*8)%8
-end
-
-function move(self,ix,iy)
+local function move(self,ix,iy)
   local x,y = self:getX()+ix,self:getY()+iy
   if level:checkCollision(x,y,0.5) == nil then
     self:setX(x)
@@ -130,7 +130,7 @@ function love.update(dt)
     level:setRaycastResolution( level:getRaycastResolution() + dt/100 )
   end
   if love.keyboard.isDown("-") then
-    level:setRaycastResolution( 
+    level:setRaycastResolution(
       math.max(level:getRaycastResolution() - dt/100,0.001)
     )
   end
@@ -180,7 +180,7 @@ function love.update(dt)
 
 end
 
-bg = love.graphics.newImage(art.."/bg.png")
+local bg = love.graphics.newImage(art.."/bg.png")
 
 function love.draw()
   love.graphics.setColor(255,255,255)
@@ -222,7 +222,6 @@ function love.draw()
 
 end
 
-use_mouse = false
 function love.keypressed(key)
   if key == "`" then
     use_mouse = not use_mouse

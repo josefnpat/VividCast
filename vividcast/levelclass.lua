@@ -64,6 +64,7 @@ function level:draw(x,y,rw,rh,sx,sy)
   for i = 0,w do
     local ray_angle = level.normalize(
       FOV*(i/w-0.5)+self:getPlayer():getAngle() )
+    local relative_angle = level.normalize(FOV*(i/w-0.5))
     local ray_x = self:getPlayer():getX()
     local ray_y = self:getPlayer():getY()
     local ray_length = 0
@@ -82,22 +83,22 @@ function level:draw(x,y,rw,rh,sx,sy)
       if current_x ~= new_x or current_y ~= new_y then
         current_x,current_y = new_x,new_y
       end
-    until self:getMapCallback()(current_x,current_y) ~= 0 or
+    until self:getMapCallback()(current_x, current_y) ~= 0 or
       ray_length >= self:getRaycastRange()
 
-    local tile_type = self:getMapCallback()(math.floor(ray_x),math.floor(ray_y))
+    local tile_type = self:getMapCallback()(current_x, current_y)
 
     if ray_length < self:getRaycastRange() then
 
       local tile
-      for i,v in pairs(self:getTiles()) do
+      for _,v in pairs(self:getTiles()) do
         if v.type == tile_type then
           tile = v.tile
         end
       end
       assert(tile,"Tile type `"..tile_type.."` not set.")
 
-      local draw_height = h/ray_length
+      local draw_height = h/(ray_length * math.cos(relative_angle))
       local darkness = (1-ray_length/self:getRaycastRange())
 
       local ray_xdist = math.abs(1-ray_x%1)
@@ -170,7 +171,8 @@ function level:draw(x,y,rw,rh,sx,sy)
         end
 --]]
 
-        local is_within_range = is_within_range_std or is_within_range_left or is_within_range_right or is_within_range_zero
+        local within_range_left_right = is_within_range_left or is_within_range_right
+        local is_within_range = is_within_range_std or within_range_left_right or is_within_range_zero
 
         if entity._vision_distance < ray_length and
           entity._vision_distance < self:getRaycastRange() and
@@ -341,7 +343,7 @@ function level:removeTile(val)
     self._tiles_dirty=nil
   else
     local found = false
-    for i,v in pairs(self._tiles) do
+    for _,v in pairs(self._tiles) do
       if v == val then
         found = true
         break
@@ -373,7 +375,7 @@ function level:removeEntity(val)
     self._entitys_dirty=nil
   else
     local found = false
-    for i,v in pairs(self._entitys) do
+    for _,v in pairs(self._entitys) do
       if v == val then
         found = true
         break
