@@ -24,7 +24,6 @@ local vividcast = require "vividcast"
 
 local use_mouse = false
 
---This states which player is being viewed!
 local playerView = 0
 
 local level = nil
@@ -124,11 +123,11 @@ function love.update(dt)
   local scale = (offset / (love.graphics.getWidth() / 2)) * 40
 
   if use_mouse then
-    players[1].entity:setAngle( players[1].entity:getAngle()+scale*dt )
-    --Keeping both X and Y to the middle of the screen to address
-    --the reality that the Y of the mouse could go off the screen
-    --because it wasn't being fixed to the center point of the
-    --game window like the X was... Also looked very ugly!
+    if playerView == 0 then
+      players[1].entity:setAngle( players[1].entity:getAngle()+scale*dt )
+    elseif playerView ~= 0 then
+      players[playerView].entity:setAngle( players[playerView].entity:getAngle()+scale*dt )
+    end
     love.mouse.setX(love.graphics.getWidth() / 2)
     love.mouse.setY(love.graphics.getHeight() / 2)
   end
@@ -192,101 +191,82 @@ local bg = love.graphics.newImage(art.."/bg.png")
 
 function love.draw()
   love.graphics.setColor(255,255,255)
-
-  local lw = love.graphics.getWidth()/2
-  local lh = love.graphics.getHeight()/2
+  
+  local padding = 8
+  
+  local lw = love.graphics.getWidth()/2-padding*2
+  local lh = love.graphics.getHeight()/2-padding*2
   
   if playerView == 0 then
     for i,player in pairs(players) do
-
-       local player_x = (i-1)%2
-       local player_y = math.floor((i-1)/2)
-
-       local lx = player_x*love.graphics.getWidth()/2
-       local ly = player_y*love.graphics.getHeight()/2
-
-       -- Draw a fun paralaxing background!
-       love.graphics.setScissor(lx,ly,lw,lh)
-       love.graphics.draw(bg,
-       lx-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
-       ly,0,lw/bg:getWidth(),lh/bg:getHeight())
-       love.graphics.draw(bg,
-       lx+lw-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
-       ly,0,lw/bg:getWidth(),lh/bg:getHeight())
-       love.graphics.setScissor()
-
-       -- Draw the level in relation to the current player
-       level:setPlayer(player.entity)
-
-       local draw_scale = (love.graphics.getHeight()/2)/128
-       level:draw(lx,ly,lw,lh,draw_scale)
-       --love.graphics.rectangle("line",lx,ly,lw,lh)
-       love.graphics.print("Player "..i,lx + love.graphics.getWidth()/4 - love.graphics.getFont():getWidth("Player "..i)/2,ly + love.graphics.getHeight()/4 - love.graphics.getFont():getHeight("Player "..i)/2)
+      local player_x = (i-1)%2
+      local player_y = math.floor((i-1)/2)
+      local lx = player_x*love.graphics.getWidth()/2+padding
+      local ly = player_y*love.graphics.getHeight()/2+padding
+      
+      -- Draw a fun paralaxing background!
+      love.graphics.setScissor(lx,ly,lw,lh)
+      love.graphics.draw(bg,
+      lx-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
+      ly,0,lw/bg:getWidth(),lh/bg:getHeight())
+      love.graphics.draw(bg,
+      lx+lw-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
+      ly,0,lw/bg:getWidth(),lh/bg:getHeight())
+      love.graphics.setScissor()
+      
+      -- Draw the level in relation to the current player
+      level:setPlayer(player.entity)
+      level:draw(lx,ly,lw,lh)
+      
+      love.graphics.print("Player "..i,(lx+padding)+(love.graphics.getWidth()/4-love.graphics.getFont():getWidth("Player "..i)/2),(ly+padding)+(love.graphics.getHeight()/4-love.graphics.getFont():getHeight("Player "..i)/2))
     end
   elseif playerView ~= 0 then
-       local pid = playerView
-       local player = players[pid]
-  	   local player_x = (pid-1)%2
-       local player_y = math.floor((pid-1)/2)
-
-       local lx = 0
-       local ly = 0
-
-       -- Draw a fun paralaxing background!
-       love.graphics.setScissor(lx,ly,love.graphics.getWidth(),love.graphics.getHeight())
-       love.graphics.draw(bg,
-       lx-(player.entity:getAngle()/(math.pi/2)*love.graphics.getWidth())%love.graphics.getWidth(),
-       ly,0,love.graphics.getWidth()/bg:getWidth(),love.graphics.getHeight()/bg:getHeight())
-       love.graphics.draw(bg,
-       lx+love.graphics.getWidth()-(player.entity:getAngle()/(math.pi/2)*love.graphics.getWidth())%love.graphics.getWidth(),
-       ly,0,love.graphics.getWidth()/bg:getWidth(),love.graphics.getHeight()/bg:getHeight())
-       love.graphics.setScissor()
-
-       -- Draw the level in relation to the current player
-       level:setPlayer(player.entity)
-
-       local draw_scale = (love.graphics.getHeight()/2)/128
-       level:draw(lx,ly,love.graphics.getWidth(),love.graphics.getHeight())
-       love.graphics.print("Player "..pid,love.graphics.getWidth()/2-love.graphics.getFont():getWidth("Player "..pid)/2,love.graphics.getHeight()/2-love.graphics.getFont():getHeight("Player "..pid)/2)
+    local pid = playerView
+    local player = players[pid]
+    local player_x = (pid-1)%2
+    local player_y = math.floor((pid-1)/2)
+    
+    local lw = love.graphics.getWidth() - padding*2
+    local lh = love.graphics.getHeight() - padding*2
+    local lx = 0 + padding
+    local ly = 0 + padding
+    
+    -- Draw a fun paralaxing background!
+    love.graphics.setScissor(lx,ly,lw,lh)
+    love.graphics.draw(bg,
+    lx-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
+    ly,0,lw/bg:getWidth(),lh/bg:getHeight())
+    love.graphics.draw(bg,
+    lx+lw-(player.entity:getAngle()/(math.pi/2)*lw)%lw,
+    ly,0,lw/bg:getWidth(),lh/bg:getHeight())
+    love.graphics.setScissor()
+    
+    -- Draw the level in relation to the current player
+    level:setPlayer(player.entity)
+    level:draw(lx,ly,lw,lh)
+    
+    love.graphics.print("Player "..pid,(lw/2+padding)-(love.graphics.getFont():getWidth("Player "..pid)/2),(lh/2+padding)-(love.graphics.getFont():getHeight("Player "..pid)/2))
   end
 
-  love.graphics.print( love.timer.getFPS().." fps | Resolution: "..level:getRaycastResolution() )
-
+  love.graphics.print(love.timer.getFPS().." fps | Resolution: "..level:getRaycastResolution())
 end
 
 function love.keypressed(key)
   if key == "`" then
     use_mouse = not use_mouse
-    --[[NOTE: Hiding the mouse stops the weird effect
-    Where it keeps on moving back to the
-    center of the screen]]--
-  	local state = not love.mouse.isVisible()
-    love.mouse.setVisible (state)
-  elseif key == "f1" then
-     if playerView ~= 1 then
-        playerView = 1
-     elseif playerView == 1 then
-        playerView = 0
-     end
-  elseif key == "f2" then
-     if playerView ~= 2 then
-        playerView = 2
-     elseif playerView == 2 then
-        playerView = 0
-     end
-  elseif key == "f3" then
-     if playerView ~= 3 then
-        playerView = 3
-     elseif playerView == 3 then
-        playerView = 0
-     end
-  elseif key == "f4" then
-     if playerView ~= 4 then
-        playerView = 4
-     elseif playerView == 4 then
-        playerView = 0
-     end
+    local state = not love.mouse.isVisible()
+    love.mouse.setVisible(state)
   elseif key == "escape" then
-     love.event.quit()
+    love.event.quit()
+  end
+  
+  for i = 1,4 do
+    if key == ("f"..i) then
+      if playerView == i then
+        playerView = 0
+      elseif playerView ~= i then
+        playerView = i
+      end
+    end
   end
 end
