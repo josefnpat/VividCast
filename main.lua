@@ -53,7 +53,7 @@ local enemyPossiblePositions = {
 }
 
 if #enemyPossiblePositions ~= map_size then
-  assert("Amount of entries in enemyPossiblePositions Table ("..#enemyPossiblePositions..") is not equal to map_size ("..map_size..").")
+  assert("Length of enemyPossiblePositions ("..#enemyPossiblePositions..") is not equal to map_size ("..map_size..").")
 end
 
 local function calc_direction(angle)
@@ -126,7 +126,6 @@ function love.load()
       controls=controls[i]
     }
   end
-
 end
 
 local function move(self,ix,iy)
@@ -243,10 +242,10 @@ function love.draw()
     local player_x = (pid-1)%2
     local player_y = math.floor((pid-1)/2)
     
-    local lw = love.graphics.getWidth() - padding*2
-    local lh = love.graphics.getHeight() - padding*2
-    local lx = 0 + padding
-    local ly = 0 + padding
+    local lw = love.graphics.getWidth()-padding*2
+    local lh = love.graphics.getHeight()-padding*2
+    local lx = 0+padding
+    local ly = 0+padding
     
     -- Draw a fun paralaxing background!
     love.graphics.setScissor(lx,ly,lw,lh)
@@ -279,7 +278,7 @@ function love.keypressed(key)
     love.event.quit()
   end
   
-  for i = 1,#players do
+  for i=1,#players do
     if key == ("f"..i) then
       if playerView == i then
         playerView = 0
