@@ -41,15 +41,15 @@ local controls = {
 local enemyPossiblePositions = {
   {xPos = 6.6, yPos = 5.5},
   {xPos = 6.6, yPos = 7.5},
-  {xPos = 4.5, yPos = 5.4},
-  {xPos = 6.6, yPos = 10.3},
-  {xPos = 2.7, yPos = 10.3},
-  {xPos = 2.7, yPos = 2.6},
-  {xPos = 6.6, yPos = 2.6},
+  {xPos = 4.5, yPos = 5.5},
+  {xPos = 6.6, yPos = 10.5},
+  {xPos = 2.5, yPos = 10.5},
+  {xPos = 2.5, yPos = 2.5},
+  {xPos = 6.6, yPos = 2.5},
   {xPos = 8.5, yPos = 5.5},
   {xPos = 8.5, yPos = 7.5},
-  {xPos = 9.4, yPos = 10.3},
-  {xPos = 9.4, yPos = 2.6}
+  {xPos = 9.4, yPos = 10.5},
+  {xPos = 9.4, yPos = 2.5}
 }
 
 if #enemyPossiblePositions ~= map_size then
@@ -64,7 +64,7 @@ function love.load()
   -- Level!
   level = vividcast.level.new()
   level:setMapCallback(map)
-  level:setRaycastRange( math.sqrt( map_size^2 + map_size^2) )
+  level:setRaycastRange(math.sqrt(map_size^2+map_size^2))
   level:setRaycastResolution(default_resolution)
 
   -- Tiles!
@@ -88,32 +88,32 @@ function love.load()
   end
 
   for i = 0,7 do
-    enemy_directions[i]  = love.graphics.newImage(art.."/enemy_"..i..".png")
+    enemy_directions[i] = love.graphics.newImage(art.."/enemy_"..i..".png")
     enemy_directions[i]:setFilter("nearest","nearest")
     player_directions[i] = love.graphics.newImage(art.."/player_"..i..".png")
     player_directions[i]:setFilter("nearest","nearest")
   end
 
   -- Enemy!
-  for _= 1,map_size do
+  for _=1,map_size do
     local entity = vividcast.entity.new()
 
     local color = {0,0,0}
-    color[math.random(1,3)] = 255
+    color[love.math.random(1,3)] = 255
     entity:setColor(color)
     
-    local positionTableID = math.random(1,#enemyPossiblePositions)
+    local positionTableID = love.math.random(1,#enemyPossiblePositions)
     entity:setX(enemyPossiblePositions[positionTableID].xPos)
     entity:setY(enemyPossiblePositions[positionTableID].yPos)
     entity:setAngle(0)
-    entity:setTexture(function(_, angle)
+    entity:setTexture(function(_,angle)
       return enemy_directions[calc_direction(angle)] end)
     level:addEntity(entity)
     table.insert(enemies,entity)
     table.remove(enemyPossiblePositions,positionTableID)
   end
 
-  for i = 1,#controls do
+  for i=1,#controls do
     local entity = vividcast.entity.new()
     entity:setX(2+i)
     entity:setY(3)
@@ -138,30 +138,30 @@ local function move(self,ix,iy)
 end
 
 function love.update(dt)
-  local offset = love.mouse.getX() - love.graphics.getWidth() / 2
-  local scale = (offset / (love.graphics.getWidth() / 2)) * 40
+  local offset = love.mouse.getX()-love.graphics.getWidth()/2
+  local scale = (offset/(love.graphics.getWidth()/2))*40
 
   if use_mouse then
     if playerView ~= 0 then
-      players[playerView].entity:setAngle( players[playerView].entity:getAngle()+scale*dt )
+      players[playerView].entity:setAngle(players[playerView].entity:getAngle()+scale*dt)
     end
-    love.mouse.setX(love.graphics.getWidth() / 2)
-    love.mouse.setY(love.graphics.getHeight() / 2)
+    love.mouse.setX(love.graphics.getWidth()/2)
+    love.mouse.setY(love.graphics.getHeight()/2)
   end
 
   -- RaycastResoluton
   if love.keyboard.isDown("=") then
-    level:setRaycastResolution( level:getRaycastResolution() + dt/100 )
+    level:setRaycastResolution(level:getRaycastResolution()+dt/100)
   end
   if love.keyboard.isDown("-") then
     level:setRaycastResolution(
-      math.max(level:getRaycastResolution() - dt/100,0.001)
+      math.max(level:getRaycastResolution()-dt/100,0.001)
     )
   end
 
   -- Enemy rotation
   for _,enemy in pairs(enemies) do
-    enemy:setAngle( enemy:getAngle() + dt )
+    enemy:setAngle(enemy:getAngle()+dt)
   end
 
   -- Player movement
@@ -170,35 +170,35 @@ function love.update(dt)
   for _,player in pairs(players) do
     -- Move forward
     if love.keyboard.isDown(player.controls[2]) then
-      move( player.entity,
-            math.cos(player.entity:getAngle())*move_speed*dt,
-            math.sin(player.entity:getAngle())*move_speed*dt )
+      move(player.entity,
+           math.cos(player.entity:getAngle())*move_speed*dt,
+           math.sin(player.entity:getAngle())*move_speed*dt)
     end
     -- Move backwards
     if love.keyboard.isDown(player.controls[5]) then
-      move( player.entity,
-            math.cos(player.entity:getAngle()+math.pi)*move_speed*dt,
-            math.sin(player.entity:getAngle()+math.pi)*move_speed*dt )
+      move(player.entity,
+           math.cos(player.entity:getAngle()+math.pi)*move_speed*dt,
+           math.sin(player.entity:getAngle()+math.pi)*move_speed*dt)
     end
     -- Turn left
     if love.keyboard.isDown(player.controls[4]) then
-      player.entity:setAngle( player.entity:getAngle()-turn_speed*dt )
+      player.entity:setAngle(player.entity:getAngle()-turn_speed*dt)
     end
     -- Turn right
     if love.keyboard.isDown(player.controls[6]) then
-      player.entity:setAngle( player.entity:getAngle()+turn_speed*dt )
+      player.entity:setAngle(player.entity:getAngle()+turn_speed*dt)
     end
     -- Strafe left
     if love.keyboard.isDown(player.controls[1]) then
-      move( player.entity,
-            math.cos(player.entity:getAngle()-math.pi/2)*move_speed*dt,
-            math.sin(player.entity:getAngle()-math.pi/2)*move_speed*dt )
+      move(player.entity,
+           math.cos(player.entity:getAngle()-math.pi/2)*move_speed*dt,
+           math.sin(player.entity:getAngle()-math.pi/2)*move_speed*dt)
     end
     -- Strafe right
     if love.keyboard.isDown(player.controls[3]) then
-      move( player.entity,
-            math.cos(player.entity:getAngle()+math.pi/2)*move_speed*dt,
-            math.sin(player.entity:getAngle()+math.pi/2)*move_speed*dt )
+      move(player.entity,
+           math.cos(player.entity:getAngle()+math.pi/2)*move_speed*dt,
+           math.sin(player.entity:getAngle()+math.pi/2)*move_speed*dt)
     end
   end
 
