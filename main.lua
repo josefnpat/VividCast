@@ -38,6 +38,24 @@ local controls = {
   {"pageup","up","pagedown","left","down","right"}
 }
 
+local enemyPossiblePositions = {
+  {xPos = 6.6, yPos = 5.5},
+  {xPos = 6.6, yPos = 7.5},
+  {xPos = 4.5, yPos = 5.4},
+  {xPos = 6.6, yPos = 10.3},
+  {xPos = 2.7, yPos = 10.3},
+  {xPos = 2.7, yPos = 2.6},
+  {xPos = 6.6, yPos = 2.6},
+  {xPos = 8.5, yPos = 5.5},
+  {xPos = 8.5, yPos = 7.5},
+  {xPos = 9.4, yPos = 10.3},
+  {xPos = 9.4, yPos = 2.6}
+}
+
+if #enemyPossiblePositions ~= map_size then
+  assert("Amount of entries in enemyPossiblePositions Table ("..#enemyPossiblePositions..") is not equal to map_size ("..map_size..").")
+end
+
 local function calc_direction(angle)
   return math.floor(((angle+math.pi/8)/(math.pi*2))*8)%8
 end
@@ -77,21 +95,22 @@ function love.load()
   end
 
   -- Enemy!
-  for _=1, map_size do
+  for _= 1,map_size do
     local entity = vividcast.entity.new()
 
     local color = {0,0,0}
     color[math.random(1,3)] = 255
-
     entity:setColor(color)
-
-    entity:setX( math.random(2,map_size-1)+0.5)
-    entity:setY( math.random(2,map_size-1)+0.5)
+    
+    local positionTableID = math.random(1,#enemyPossiblePositions)
+    entity:setX(enemyPossiblePositions[positionTableID].xPos)
+    entity:setY(enemyPossiblePositions[positionTableID].yPos)
     entity:setAngle(0)
     entity:setTexture(function(_, angle)
       return enemy_directions[calc_direction(angle)] end)
     level:addEntity(entity)
     table.insert(enemies,entity)
+    table.remove(enemyPossiblePositions,positionTableID)
   end
 
   for i = 1,#controls do
@@ -123,9 +142,7 @@ function love.update(dt)
   local scale = (offset / (love.graphics.getWidth() / 2)) * 40
 
   if use_mouse then
-    if playerView == 0 then
-      players[1].entity:setAngle( players[1].entity:getAngle()+scale*dt )
-    elseif playerView ~= 0 then
+    if playerView ~= 0 then
       players[playerView].entity:setAngle( players[playerView].entity:getAngle()+scale*dt )
     end
     love.mouse.setX(love.graphics.getWidth() / 2)
@@ -246,21 +263,23 @@ function love.draw()
     level:draw(lx,ly,lw,lh)
     
     love.graphics.print("Player "..pid,(lw/2+padding)-(love.graphics.getFont():getWidth("Player "..pid)/2),(lh/2+padding)-(love.graphics.getFont():getHeight("Player "..pid)/2))
+    love.graphics.print("X Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle(),(lw-(love.graphics.getFont():getWidth("X Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle()))-padding),0+(padding*2))
   end
-
-  love.graphics.print(love.timer.getFPS().." fps | Resolution: "..level:getRaycastResolution())
+  love.graphics.print(love.timer.getFPS().." fps | Resolution: "..level:getRaycastResolution(),0+(padding*2),0+(padding*2))
 end
 
 function love.keypressed(key)
   if key == "`" then
-    use_mouse = not use_mouse
-    local state = not love.mouse.isVisible()
-    love.mouse.setVisible(state)
+    if playerView ~= 0 then
+      use_mouse = not use_mouse
+      local state = not love.mouse.isVisible()
+      love.mouse.setVisible(state)
+    end
   elseif key == "escape" then
     love.event.quit()
   end
   
-  for i = 1,4 do
+  for i = 1,#players do
     if key == ("f"..i) then
       if playerView == i then
         playerView = 0
