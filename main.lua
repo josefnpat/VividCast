@@ -234,7 +234,11 @@ function love.draw()
       level:setPlayer(player.entity)
       level:draw(lx,ly,lw,lh)
       
-      love.graphics.print("Player "..i,(lx+padding)+(love.graphics.getWidth()/4-love.graphics.getFont():getWidth("Player "..i)/2),(ly+padding)+(love.graphics.getHeight()/4-love.graphics.getFont():getHeight("Player "..i)/2))
+      if i == 1 or i == 3 then
+        love.graphics.print("Player "..i.."\nX Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle(),(lw-(love.graphics.getFont():getWidth("Player "..i.."\nX Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle()))-padding),ly+(padding*2))
+      elseif i == 2 or i == 4 then
+        love.graphics.print("Player "..i.."\nX Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle(),(lw*2-(love.graphics.getFont():getWidth("Player "..i.."\nX Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle()))-padding),ly+(padding*2))
+      end
     end
   elseif playerView ~= 0 then
     local pid = playerView
@@ -261,8 +265,7 @@ function love.draw()
     level:setPlayer(player.entity)
     level:draw(lx,ly,lw,lh)
     
-    love.graphics.print("Player "..pid,(lw/2+padding)-(love.graphics.getFont():getWidth("Player "..pid)/2),(lh/2+padding)-(love.graphics.getFont():getHeight("Player "..pid)/2))
-    love.graphics.print("X Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle(),(lw-(love.graphics.getFont():getWidth("X Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle()))-padding),0+(padding*2))
+    love.graphics.print("Player "..pid.."\nX Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle(),(lw-(love.graphics.getFont():getWidth("Player "..pid.."\nX Position: "..player.entity:getX().."\nY Position: "..player.entity:getY().."\nAngle: "..player.entity:getAngle()))-padding),0+(padding*2))
   end
   love.graphics.print(love.timer.getFPS().." fps | Resolution: "..level:getRaycastResolution(),0+(padding*2),0+(padding*2))
 end
@@ -281,7 +284,9 @@ function love.keypressed(key)
   for i=1,#players do
     if key == ("f"..i) then
       if playerView == i then
-        playerView = 0
+        if use_mouse == false then
+          playerView = 0
+        end
       elseif playerView ~= i then
         playerView = i
       end
